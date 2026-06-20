@@ -47,6 +47,10 @@ async function run() {
             const cursor = await donationRequestCollaction.find().toArray()
             res.json(cursor)
         })
+        app.get('/api/donationrequest/:id', async (req, res) => {
+            const cursor = await donationRequestCollaction.findOne()
+            res.json(cursor)
+        })
 
 
         app.get('/api/my/donationrequest', async (req, res) => {
