@@ -28,7 +28,7 @@ async function run() {
 
         const database = client.db(process.env.MONGODB_DB)
         const userCollaction = database.collection('usercollaction')
-        const donationRequestCollaction=database.collection('donationrequestcollaction')
+        const donationRequestCollaction = database.collection('donationrequestcollaction')
 
 
         app.post('/api/users', async (req, res) => {
@@ -39,13 +39,17 @@ async function run() {
         app.post('/api/donationrequest', async (req, res) => {
             const requestdocs = req.body
             const result = await donationRequestCollaction.insertOne(requestdocs)
-            res.json(result)    
+            res.json(result)
         })
 
 
-        
+        app.get('/api/donationrequest', async (req, res) => {
+            const cursor = await donationRequestCollaction.find().toArray()
+            res.json(cursor)
+        })
 
-            app.get('/api/my/donationrequest', async (req, res) => {
+
+        app.get('/api/my/donationrequest', async (req, res) => {
 
             const query = {}
 
