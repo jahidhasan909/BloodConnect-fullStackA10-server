@@ -28,12 +28,18 @@ async function run() {
 
         const database = client.db(process.env.MONGODB_DB)
         const userCollaction = database.collection('usercollaction')
+        const donationRequestCollaction=database.collection('donationrequestcollaction')
 
 
         app.post('/api/users', async (req, res) => {
             const userdocs = req.body
             const result = await userCollaction.insertOne(userdocs)
             res.json(result)
+        })
+        app.post('/api/donationrequest', async (req, res) => {
+            const requestdocs = req.body
+            const result = await donationRequestCollaction.insertOne(requestdocs)
+            res.json(result)    
         })
 
 
