@@ -43,6 +43,21 @@ async function run() {
         })
 
 
+        
+
+            app.get('/api/my/donationrequest', async (req, res) => {
+
+            const query = {}
+
+            if (req.query.requesterEmail) {
+                query.requesterEmail = req.query.requesterEmail
+            }
+            const result = await donationRequestCollaction.find(query).toArray()
+            res.json(result)
+
+        })
+
+
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
