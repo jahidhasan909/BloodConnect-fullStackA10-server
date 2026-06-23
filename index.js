@@ -73,7 +73,7 @@ async function run() {
         })
 
         app.get('/api/my/pegination/donationrequest', async (req, res) => {
-            const { page = 1, limit = 2 } = req.query
+            const { page = 1, limit = 10 } = req.query
             const skip = (Number(page) - 1) * Number(limit)
             const query = {}
 
@@ -82,6 +82,17 @@ async function run() {
             }
             const result = await donationRequestCollaction.find(query).skip(skip).limit(Number(limit)).toArray()
             const totalData = await donationRequestCollaction.countDocuments(query);
+            const totalPage = Math.ceil(totalData / Number(limit));
+            res.json({ data: result, page: Number(page), totalPage })
+        })
+
+        app.get('/api/volunteer/pegination/donationrequest', async (req, res) => {
+            const { page = 1, limit = 10 } = req.query
+            const skip = (Number(page) - 1) * Number(limit)
+           
+           
+            const result = await donationRequestCollaction.find().skip(skip).limit(Number(limit)).toArray()
+            const totalData = await donationRequestCollaction.countDocuments();
             const totalPage = Math.ceil(totalData / Number(limit));
             res.json({ data: result, page: Number(page), totalPage })
         })
