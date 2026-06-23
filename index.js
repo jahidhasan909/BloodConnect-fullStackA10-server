@@ -36,6 +36,13 @@ async function run() {
             const result = await userCollaction.insertOne(userdocs)
             res.json(result)
         })
+
+        app.get('/api/users', async (req, res) => {
+            const corsor = await userCollaction.find().toArray()
+            res.json(corsor)
+        })
+
+
         app.post('/api/donationrequest', async (req, res) => {
             const requestdocs = req.body
             const result = await donationRequestCollaction.insertOne(requestdocs)
