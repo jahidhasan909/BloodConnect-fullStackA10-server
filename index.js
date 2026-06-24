@@ -88,6 +88,36 @@ async function run() {
 
         })
 
+        app.patch('/api/donationrequest/done/:id', async (req, res) => {
+            const id = req.params.id
+            
+            const fillter = { _id: new ObjectId(id) }
+            const updateDocument = {
+                $set: {
+                    donationStatus: 'done'
+                }
+            }
+
+            const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
+            res.json(result)
+
+        })
+        app.patch('/api/donationrequest/canceled/:id', async (req, res) => {
+            const id = req.params.id
+            
+
+            const fillter = { _id: new ObjectId(id) }
+            const updateDocument = {
+                $set: {
+                    donationStatus: 'canceled'
+                }
+            }
+
+            const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
+            res.json(result)
+
+        })
+
         app.get('/api/my/pegination/donationrequest', async (req, res) => {
             const { page = 1, limit = 10 } = req.query
             const skip = (Number(page) - 1) * Number(limit)
