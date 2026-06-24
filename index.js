@@ -90,7 +90,7 @@ async function run() {
 
         app.patch('/api/donationrequest/done/:id', async (req, res) => {
             const id = req.params.id
-            
+
             const fillter = { _id: new ObjectId(id) }
             const updateDocument = {
                 $set: {
@@ -104,13 +104,29 @@ async function run() {
         })
         app.patch('/api/donationrequest/canceled/:id', async (req, res) => {
             const id = req.params.id
-            
+
 
             const fillter = { _id: new ObjectId(id) }
             const updateDocument = {
                 $set: {
                     donationStatus: 'canceled'
                 }
+            }
+
+            const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
+            res.json(result)
+
+        })
+
+        app.patch('/api/donationrequest/edit/:id', async (req, res) => {
+            const id = req.params.id
+
+            const updateData = req.body
+           
+            
+            const fillter = { _id: new ObjectId(id) }
+            const updateDocument = {
+                $set: {...updateData}
             }
 
             const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
