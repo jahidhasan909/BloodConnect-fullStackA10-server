@@ -73,6 +73,33 @@ async function run() {
 
 
 
+        app.patch('/api/usercollaction/makevolunteer', async (req, res) => {
+            const query = {}
+            if (req.query.email) {
+                query.email = req.query.email
+            }
+            const updateDocument = {
+                $set: {
+                    role: 'volunteer'
+                }
+            }
+
+            const result = await userCollaction.updateOne(query, updateDocument)
+            const cursor = await users.updateOne({ email: req.query.email }, {
+                $set: {
+                    role: 'volunteer'
+                }
+            })
+            res.json({ result, cursor })
+
+        })
+
+
+
+
+
+
+
         app.post('/api/donationrequest', async (req, res) => {
             const requestdocs = req.body
             const result = await donationRequestCollaction.insertOne(requestdocs)
@@ -202,8 +229,8 @@ async function run() {
             const skip = (Number(page) - 1) * Number(limit)
 
 
-            const result = await donationRequestCollaction.find().skip(skip).limit(Number(limit)).toArray()
-            const totalData = await donationRequestCollaction.countDocuments();
+            const result = await userCollaction.find().skip(skip).limit(Number(limit)).toArray()
+            const totalData = await userCollaction.countDocuments();
             const totalPage = Math.ceil(totalData / Number(limit));
             res.json({ data: result, page: Number(page), totalPage })
         })
