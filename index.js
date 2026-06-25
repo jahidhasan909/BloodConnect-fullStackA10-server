@@ -28,6 +28,7 @@ async function run() {
 
         const database = client.db(process.env.MONGODB_DB)
         const userCollaction = database.collection('usercollaction')
+        const users = database.collection('user')
         const donationRequestCollaction = database.collection('donationrequestcollaction')
 
 
@@ -40,6 +41,33 @@ async function run() {
         app.get('/api/users', async (req, res) => {
             const corsor = await userCollaction.find().toArray()
             res.json(corsor)
+        })
+
+        app.get('/api/own/users', async (req, res) => {
+            const query = {}
+            if (req.query.email) {
+                query.email = req.query.email
+            }
+            const corsor = await userCollaction.findOne(query)
+            res.json(corsor)
+        })
+        app.patch('/api/own/edit/users', async (req, res) => {
+            const query = {}
+            const updateData = req.body
+            if (req.query.email) {
+                query.email = req.query.email
+            }
+            const updateDocument = {
+                $set: { ...updateData }
+            }
+
+            const corsor = await userCollaction.updateOne(query, updateDocument)
+            const result = await users.updateOne({ email: req.query.email }, {
+                $set: {
+                    name: updateData.name
+                }
+            })
+            res.json({ corsor, result })
         })
 
 
@@ -122,11 +150,11 @@ async function run() {
             const id = req.params.id
 
             const updateData = req.body
-           
-            
+
+
             const fillter = { _id: new ObjectId(id) }
             const updateDocument = {
-                $set: {...updateData}
+                $set: { ...updateData }
             }
 
             const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
