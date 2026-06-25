@@ -73,6 +73,26 @@ async function run() {
 
 
 
+        app.patch('/api/usercollaction/makeadmin', async (req, res) => {
+            const query = {}
+            if (req.query.email) {
+                query.email = req.query.email
+            }
+            const updateDocument = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+
+            const result = await userCollaction.updateOne(query, updateDocument)
+            const cursor = await users.updateOne({ email: req.query.email }, {
+                $set: {
+                    role: 'admin'
+                }
+            })
+            res.json({ result, cursor })
+
+        })
         app.patch('/api/usercollaction/makevolunteer', async (req, res) => {
             const query = {}
             if (req.query.email) {
@@ -206,6 +226,36 @@ async function run() {
             const updateDocument = {
                 $set: {
                     donationStatus: 'canceled'
+                }
+            }
+
+            const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
+            res.json(result)
+
+        })
+        app.patch('/api/donationrequest/pending/:id', async (req, res) => {
+            const id = req.params.id
+
+
+            const fillter = { _id: new ObjectId(id) }
+            const updateDocument = {
+                $set: {
+                    donationStatus: 'pending'
+                }
+            }
+
+            const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
+            res.json(result)
+
+        })
+        app.patch('/api/donationrequest/inprogress/:id', async (req, res) => {
+            const id = req.params.id
+
+
+            const fillter = { _id: new ObjectId(id) }
+            const updateDocument = {
+                $set: {
+                    donationStatus: 'inprogress'
                 }
             }
 
