@@ -29,6 +29,7 @@ async function run() {
         const database = client.db(process.env.MONGODB_DB)
         const userCollaction = database.collection('usercollaction')
         const users = database.collection('user')
+        const funding=database.collection('funding')
         const donationRequestCollaction = database.collection('donationrequestcollaction')
 
 
@@ -37,11 +38,27 @@ async function run() {
             const result = await userCollaction.insertOne(userdocs)
             res.json(result)
         })
+        app.post('/api/funding', async (req, res) => {
+            const fundingdetails = req.body
+            const result = await funding.insertOne(fundingdetails)
+            res.json(result)
+        })
+        app.get('/api/pegination/funding', async (req, res) => {
+           const { page = 1, limit = 10 } = req.query
+            const skip = (Number(page) - 1) * Number(limit)
+
+
+            const result = await funding.find().skip(skip).limit(Number(limit)).toArray()
+            const totalData = await funding.countDocuments();
+            const totalPage = Math.ceil(totalData / Number(limit));
+            res.json({ data: result, page: Number(page), totalPage })
+        })
 
         app.get('/api/users', async (req, res) => {
             const corsor = await userCollaction.find().toArray()
             res.json(corsor)
         })
+      
 
         app.get('/api/own/users', async (req, res) => {
             const query = {}
