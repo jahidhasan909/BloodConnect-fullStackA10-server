@@ -3,6 +3,7 @@ const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config()
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 const port = process.env.PORT || 8000
 
 
@@ -21,6 +22,48 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+
+
+
+
+const JWKS = createRemoteJWKSet(new URL(process.env.JWKSUSER_URI))
+
+const verifyToken = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
+        return res.status(401).json({ msg: "Unauthorized" });
+    }
+
+
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+        return res.status(401).json({ msg: "Unauthorized" });
+    }
+
+    try {
+        const { payload } = await jwtVerify(token, JWKS);
+        req.user = payload;
+
+        next();
+    } catch (error) {
+        console.log(error);
+        return res.status(401).json({ msg: "Unauthorized" });
+    }
+};
+
+
+
+
+
+
+
+
+
+
 async function run() {
     try {
         await client.connect();
@@ -29,8 +72,41 @@ async function run() {
         const database = client.db(process.env.MONGODB_DB)
         const userCollaction = database.collection('usercollaction')
         const users = database.collection('user')
-        const funding=database.collection('funding')
+        const funding = database.collection('funding')
         const donationRequestCollaction = database.collection('donationrequestcollaction')
+
+
+        const verifyRole = (...roles) => {
+            return async (req, res, next) => {
+
+                const email = req.user.email;
+
+                const user = await userCollaction.findOne({ email });
+
+                if (!user) {
+                    return res.status(404).json({
+                        message: "User not found"
+                    });
+                }
+
+                if (!roles.includes(user.role)) {
+                    return res.status(403).json({
+                        message: "Forbidden"
+                    });
+                }
+
+                req.dbUser = user;
+
+                next();
+            };
+        };
+
+
+
+
+
+
+
 
 
         app.post('/api/users', async (req, res) => {
@@ -44,7 +120,7 @@ async function run() {
             res.json(result)
         })
         app.get('/api/pegination/funding', async (req, res) => {
-           const { page = 1, limit = 10 } = req.query
+            const { page = 1, limit = 10 } = req.query
             const skip = (Number(page) - 1) * Number(limit)
 
 
@@ -58,7 +134,7 @@ async function run() {
             const corsor = await userCollaction.find().toArray()
             res.json(corsor)
         })
-      
+
 
         app.get('/api/own/users', async (req, res) => {
             const query = {}
@@ -90,7 +166,7 @@ async function run() {
 
 
 
-        app.patch('/api/usercollaction/makeadmin', async (req, res) => {
+        app.patch('/api/usercollaction/makeadmin', verifyToken, verifyRole('admin' ), async (req, res) => {
             const query = {}
             if (req.query.email) {
                 query.email = req.query.email
@@ -110,7 +186,7 @@ async function run() {
             res.json({ result, cursor })
 
         })
-        app.patch('/api/usercollaction/makevolunteer', async (req, res) => {
+        app.patch('/api/usercollaction/makevolunteer', verifyToken, verifyRole('admin'), async (req, res) => {
             const query = {}
             if (req.query.email) {
                 query.email = req.query.email
@@ -131,7 +207,7 @@ async function run() {
 
         })
 
-        app.patch('/api/usercollaction/makeblock', async (req, res) => {
+        app.patch('/api/usercollaction/makeblock', verifyToken, verifyRole('admin'), async (req, res) => {
             const query = {}
             if (req.query.email) {
                 query.email = req.query.email
@@ -151,7 +227,7 @@ async function run() {
             res.json({ result, cursor })
 
         })
-        app.patch('/api/usercollaction/unblocked', async (req, res) => {
+        app.patch('/api/usercollaction/unblocked', verifyToken, verifyRole('admin'), async (req, res) => {
             const query = {}
             if (req.query.email) {
                 query.email = req.query.email
