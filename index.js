@@ -114,7 +114,26 @@ async function run() {
             res.json({ result, cursor })
 
         })
-       
+        app.patch('/api/usercollaction/unblocked', async (req, res) => {
+            const query = {}
+            if (req.query.email) {
+                query.email = req.query.email
+            }
+            const updateDocument = {
+                $set: {
+                    status: 'active'
+                }
+            }
+
+            const result = await userCollaction.updateOne(query, updateDocument)
+            const cursor = await users.updateOne({ email: req.query.email }, {
+                $set: {
+                    status: 'active'
+                }
+            })
+            res.json({ result, cursor })
+
+        })
 
 
 
