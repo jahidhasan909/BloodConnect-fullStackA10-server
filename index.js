@@ -94,6 +94,28 @@ async function run() {
 
         })
 
+        app.patch('/api/usercollaction/makeblock', async (req, res) => {
+            const query = {}
+            if (req.query.email) {
+                query.email = req.query.email
+            }
+            const updateDocument = {
+                $set: {
+                    status: 'blocked'
+                }
+            }
+
+            const result = await userCollaction.updateOne(query, updateDocument)
+            const cursor = await users.updateOne({ email: req.query.email }, {
+                $set: {
+                    status: 'blocked'
+                }
+            })
+            res.json({ result, cursor })
+
+        })
+       
+
 
 
 
