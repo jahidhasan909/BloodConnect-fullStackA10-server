@@ -303,7 +303,7 @@ async function run() {
 
         })
 
-        app.patch('/api/donationrequest/done/:id', verifyToken, verifyRole('admin', 'volunteer'), async (req, res) => {
+        app.patch('/api/donationrequest/done/:id', verifyToken, verifyRole('admin', 'volunteer','donor'), async (req, res) => {
             const id = req.params.id
 
             const fillter = { _id: new ObjectId(id) }
@@ -317,7 +317,7 @@ async function run() {
             res.json(result)
 
         })
-        app.patch('/api/donationrequest/canceled/:id', verifyToken, verifyRole('admin', 'volunteer'), async (req, res) => {
+        app.patch('/api/donationrequest/canceled/:id', verifyToken, verifyRole('admin', 'volunteer','donor'), async (req, res) => {
             const id = req.params.id
 
 
