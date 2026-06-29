@@ -44,6 +44,7 @@ const verifyToken = async (req, res, next) => {
         return res.status(401).json({ msg: "Unauthorized" });
     }
 
+
     try {
         const { payload } = await jwtVerify(token, JWKS);
         req.user = payload;
@@ -119,6 +120,10 @@ async function run() {
             const result = await funding.insertOne(fundingdetails)
             res.json(result)
         })
+        app.get('/api/funding', async (req, res) => {
+            const cursor = await funding.find().toArray()
+            res.json(cursor)
+        })
         app.get('/api/pegination/funding', async (req, res) => {
             const { page = 1, limit = 10 } = req.query
             const skip = (Number(page) - 1) * Number(limit)
@@ -144,7 +149,7 @@ async function run() {
             const corsor = await userCollaction.findOne(query)
             res.json(corsor)
         })
-        app.patch('/api/own/edit/users', async (req, res) => {
+        app.patch('/api/own/edit/users', verifyToken, async (req, res) => {
             const query = {}
             const updateData = req.body
             if (req.query.email) {
@@ -157,7 +162,8 @@ async function run() {
             const corsor = await userCollaction.updateOne(query, updateDocument)
             const result = await users.updateOne({ email: req.query.email }, {
                 $set: {
-                    name: updateData.name
+                    name: updateData.name,
+                    image: updateData.image
                 }
             })
             res.json({ corsor, result })
@@ -166,7 +172,7 @@ async function run() {
 
 
 
-        app.patch('/api/usercollaction/makeadmin', verifyToken, verifyRole('admin' ), async (req, res) => {
+        app.patch('/api/usercollaction/makeadmin', verifyToken, verifyRole('admin'), async (req, res) => {
             const query = {}
             if (req.query.email) {
                 query.email = req.query.email
@@ -297,7 +303,7 @@ async function run() {
 
         })
 
-        app.patch('/api/donationrequest/done/:id', async (req, res) => {
+        app.patch('/api/donationrequest/done/:id', verifyToken, verifyRole('admin', 'volunteer'), async (req, res) => {
             const id = req.params.id
 
             const fillter = { _id: new ObjectId(id) }
@@ -311,7 +317,7 @@ async function run() {
             res.json(result)
 
         })
-        app.patch('/api/donationrequest/canceled/:id', async (req, res) => {
+        app.patch('/api/donationrequest/canceled/:id', verifyToken, verifyRole('admin', 'volunteer'), async (req, res) => {
             const id = req.params.id
 
 
@@ -326,7 +332,7 @@ async function run() {
             res.json(result)
 
         })
-        app.patch('/api/donationrequest/pending/:id', async (req, res) => {
+        app.patch('/api/donationrequest/pending/:id', verifyToken, verifyRole('admin', 'volunteer'), async (req, res) => {
             const id = req.params.id
 
 
@@ -341,7 +347,7 @@ async function run() {
             res.json(result)
 
         })
-        app.patch('/api/donationrequest/inprogress/:id', async (req, res) => {
+        app.patch('/api/donationrequest/inprogress/:id', verifyToken, verifyRole('admin', 'volunteer'), async (req, res) => {
             const id = req.params.id
 
 
@@ -369,6 +375,19 @@ async function run() {
             }
 
             const result = await donationRequestCollaction.updateOne(fillter, updateDocument)
+            res.json(result)
+
+        })
+        app.get('/api/donationrequest/get/edit/:id', async (req, res) => {
+            const id = req.params.id
+
+            
+
+
+            const fillter = { _id: new ObjectId(id) }
+
+
+            const result = await donationRequestCollaction.findOne(fillter)
             res.json(result)
 
         })
